@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Create a new account with captcha verification">
+    <title>Register - Captcha Generator</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <span class="logo-icon">🛡️</span>
+                <h1>Create Account</h1>
+            </div>
+            <p class="subtitle">Register with captcha verification</p>
+        </header>
+
+        <!-- Registration Form -->
+        <main class="auth-container">
+            <div class="auth-card">
+                {% if error %}
+                <div class="alert alert-error">{{ error }}</div>
+                {% endif %}
+                {% if success %}
+                <div class="alert alert-success">{{ success }}</div>
+                {% endif %}
+
+                <form method="POST" action="{{ url_for('register') }}" class="auth-form" id="register-form">
+                    <div class="form-group">
+                        <label for="username">Username</label>
+                        <input type="text" id="username" name="username" required placeholder="Choose a username"
+                            minlength="3" maxlength="80" value="{{ request.form.get('username', '') }}">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" name="email" required placeholder="Enter your email"
+                            value="{{ request.form.get('email', '') }}">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" name="password" required placeholder="Create a password"
+                            minlength="6">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="confirm_password">Confirm Password</label>
+                        <input type="password" id="confirm_password" name="confirm_password" required
+                            placeholder="Confirm your password" minlength="6">
+                    </div>
+
+                    <!-- Captcha Type Selector -->
+                    <div class="captcha-section">
+                        <label>Choose captcha type</label>
+                        <div class="captcha-type-selector">
+                            <button type="button" class="captcha-type-btn active" data-type="text">
+                                <span>📝</span> Text
+                            </button>
+                            <button type="button" class="captcha-type-btn" data-type="image">
+                                <span>🖼️</span> Image
+                            </button>
+                            <button type="button" class="captcha-type-btn" data-type="cloudflare">
+                                <span>☁️</span> Checkbox
+                            </button>
+                            <button type="button" class="captcha-type-btn" data-type="slider">
+                                <span>🧩</span> Slider
+                            </button>
+                        </div>
+                        <input type="hidden" id="captcha_type" name="captcha_type" value="text">
+
+                        <!-- Text Captcha -->
+                        <div id="text-captcha-container" class="captcha-container-inner">
+                            <div class="captcha-box">
+                                <img id="text-captcha-image" src="" alt="Captcha">
+                                <button type="button" class="refresh-captcha-btn" id="refresh-text-captcha"
+                                    title="New captcha">🔄</button>
+                            </div>
+                            <input type="text" id="text-captcha-input" name="captcha_answer"
+                                placeholder="Enter the characters above" autocomplete="off" maxlength="6">
+                        </div>
+
+                        <!-- Image Captcha -->
+                        <div id="image-captcha-container" class="captcha-container-inner" style="display: none;">
+                            <p class="captcha-prompt" id="image-captcha-prompt">Select all matching images</p>
+                            <div class="image-grid grid-3x3" id="image-captcha-grid"></div>
+                            <input type="hidden" id="image-captcha-input" name="image_selections">
+                            <span class="selection-counter" id="selection-counter">Selected: 0/3</span>
+                        </div>
+
+                        <!-- Cloudflare Captcha -->
+                        <div id="cloudflare-captcha-container" class="captcha-container-inner" style="display: none;">
+                            <div class="cloudflare-widget" id="cf-widget">
+                                <div class="cf-spinner"></div>
+                                <div class="cf-success">✓</div>
+                                <div class="cf-checkbox-wrapper">
+                                    <input type="checkbox" id="cf-checkbox">
+                                    <label for="cf-checkbox">
+                                        <span class="cf-checkmark"></span>
+                                        <span class="cf-text">I'm not a robot</span>
+                                    </label>
+                                </div>
+                                <div class="cf-branding">
+                                    <span class="cf-logo">🛡️</span>
+                                    <span>protected</span>
+                                </div>
+                            </div>
+                            <input type="hidden" id="cf-captcha-input" name="cf_verified" value="false">
+                        </div>
+
+                        <!-- Slider Captcha -->
+                        <div id="slider-captcha-container" class="captcha-container-inner" style="display: none;">
+                            <div class="puzzle-container" id="slider-puzzle-container">
+                                <img id="slider-bg" src="" alt="Puzzle Background">
+                                <img id="slider-piece" class="sliding-piece" src="" alt="Puzzle Piece">
+                            </div>
+                            <div class="slider-container">
+                                <input type="range" id="puzzle-slider" min="0" max="250" value="0">
+                                <div class="slider-track">
+                                    <div class="slider-progress" id="slider-progress"></div>
+                                </div>
+                            </div>
+                            <input type="hidden" id="slider-captcha-input" name="slider_position" value="0">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="auth-submit-btn">Create Account</button>
+                </form>
+
+                <div class="auth-footer">
+                    <p>Already have an account? <a href="{{ url_for('login') }}">Sign In</a></p>
+                    <p><a href="{{ url_for('home') }}">← Back to Home</a> | <a
+                            href="{{ url_for('captcha_demo') }}">Captcha Demo</a></p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        let currentCaptchaType = 'text';
+        let selectedImageIndices = [];
+        let requiredSelections = 3;
+        let cfChallengeId = null;
+        let sliderCorrectX = 0;
+
+        // Captcha type selection
+        document.querySelectorAll('.captcha-type-btn').forEach(btn => {
+            btn.addEventListener('click', function () {
+                document.querySelectorAll('.captcha-type-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+
+                currentCaptchaType = this.dataset.type;
+                document.getElementById('captcha_type').value = currentCaptchaType;
+
+                // Hide all captcha containers
+                document.querySelectorAll('.captcha-container-inner').forEach(c => c.style.display = 'none');
+
+                // Show selected captcha
+                document.getElementById(currentCaptchaType + '-captcha-container').style.display = 'block';
+
+                // Load the selected captcha
+                loadCaptcha(currentCaptchaType);
+            });
+        });
+
+        // Load captcha based on type
+        async function loadCaptcha(type) {
+            try {
+                switch (type) {
+                    case 'text':
+                        await loadTextCaptcha();
+                        break;
+                    case 'image':
+                        await loadImageCaptcha();
+                        break;
+                    case 'cloudflare':
+                        await loadCloudfareCaptcha();
+                        break;
+                    case 'slider':
+                        await loadSliderCaptcha();
+                        break;
+                }
+            } catch (e) {
+                console.error('Failed to load captcha:', e);
+            }
+        }
+
+        // Text Captcha
+        async function loadTextCaptcha() {
+            const res = await fetch('/api/text-captcha');
+            const data = await res.json();
+            document.getElementById('text-captcha-image').src = data.image;
+            document.getElementById('text-captcha-input').value = '';
+        }
+
+        // Image Captcha
+        async function loadImageCaptcha() {
+            selectedImageIndices = [];
+            const res = await fetch('/api/image-captcha');
+            const data = await res.json();
+
+            requiredSelections = data.required_selections || 3;
+            document.getElementById('image-captcha-prompt').textContent = data.prompt;
+            updateSelectionCounter();
+
+            const grid = document.getElementById('image-captcha-grid');
+            grid.innerHTML = '';
+
+            data.images.forEach((img, i) => {
+                const div = document.createElement('div');
+                div.className = 'image-option';
+                div.innerHTML = `<img src="${img.image}" alt="Option ${i + 1}">`;
+                div.addEventListener('click', () => toggleImageSelection(div, img.index));
+                grid.appendChild(div);
+            });
+        }
+
+        function toggleImageSelection(element, index) {
+            const idx = selectedImageIndices.indexOf(index);
+            if (idx > -1) {
+                selectedImageIndices.splice(idx, 1);
+                element.classList.remove('selected');
+            } else if (selectedImageIndices.length < requiredSelections) {
+                selectedImageIndices.push(index);
+                element.classList.add('selected');
+            }
+            updateSelectionCounter();
+            document.getElementById('image-captcha-input').value = JSON.stringify(selectedImageIndices);
+        }
+
+        function updateSelectionCounter() {
+            document.getElementById('selection-counter').textContent = `Selected: ${selectedImageIndices.length}/${requiredSelections}`;
+        }
+
+        // Cloudflare Captcha
+        async function loadCloudfareCaptcha() {
+            const widget = document.getElementById('cf-widget');
+            widget.classList.remove('verifying', 'verified');
+            document.getElementById('cf-checkbox').checked = false;
+            document.getElementById('cf-captcha-input').value = 'false';
+
+            const res = await fetch('/api/cloudflare-captcha');
+            const data = await res.json();
+            cfChallengeId = data.challenge_id;
+        }
+
+        document.getElementById('cf-checkbox').addEventListener('change', async function () {
+            if (this.checked && cfChallengeId) {
+                const widget = document.getElementById('cf-widget');
+                widget.classList.add('verifying');
+                document.querySelector('.cf-spinner').style.display = 'block';
+
+                // Simulate verification delay
+                await new Promise(resolve => setTimeout(resolve, 1500));
+
+                const res = await fetch('/api/cloudflare-captcha/verify', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ challenge_id: cfChallengeId })
+                });
+                const data = await res.json();
+
+                document.querySelector('.cf-spinner').style.display = 'none';
+
+                if (data.success) {
+                    widget.classList.remove('verifying');
+                    widget.classList.add('verified');
+                    document.querySelector('.cf-success').style.display = 'flex';
+                    document.getElementById('cf-captcha-input').value = 'true';
+                }
+            }
+        });
+
+        // Slider Captcha
+        async function loadSliderCaptcha() {
+            const res = await fetch('/api/sliding-puzzle');
+            const data = await res.json();
+
+            document.getElementById('slider-bg').src = data.background;
+            document.getElementById('slider-piece').src = data.piece;
+            document.getElementById('slider-piece').style.top = data.piece_y + 'px';
+            document.getElementById('slider-piece').style.left = '10px';
+            document.getElementById('puzzle-slider').value = 0;
+            document.getElementById('slider-progress').style.width = '0%';
+            sliderCorrectX = data.correct_x;
+        }
+
+        document.getElementById('puzzle-slider').addEventListener('input', function () {
+            const piece = document.getElementById('slider-piece');
+            piece.style.left = (10 + parseInt(this.value)) + 'px';
+            document.getElementById('slider-progress').style.width = (this.value / 250 * 100) + '%';
+            document.getElementById('slider-captcha-input').value = this.value;
+        });
+
+        // Refresh buttons
+        document.getElementById('refresh-text-captcha').addEventListener('click', () => loadCaptcha('text'));
+
+        // Initial load
+        document.addEventListener('DOMContentLoaded', () => loadCaptcha('text'));
+
+        // Form validation
+        document.getElementById('register-form').addEventListener('submit', function (e) {
+            const password = document.getElementById('password').value;
+            const confirm = document.getElementById('confirm_password').value;
+
+            if (password !== confirm) {
+                e.preventDefault();
+                alert('Passwords do not match!');
+                return;
+            }
+
+            // Validate captcha based on type
+            if (currentCaptchaType === 'image' && selectedImageIndices.length !== requiredSelections) {
+                e.preventDefault();
+                alert(`Please select ${requiredSelections} images.`);
+                return;
+            }
+
+            if (currentCaptchaType === 'cloudflare' && document.getElementById('cf-captcha-input').value !== 'true') {
+                e.preventDefault();
+                alert('Please complete the checkbox verification.');
+                return;
+            }
+        });
+    </script>
+</body>
+
+</html>

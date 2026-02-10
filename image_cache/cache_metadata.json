@@ -1,0 +1,45 @@
+{
+  "categories": {
+    "sunset sunshine": {
+      "count": 10,
+      "last_updated": "2026-02-09T17:11:14.994238"
+    },
+    "dog pet": {
+      "count": 10,
+      "last_updated": "2026-02-09T17:11:23.408012"
+    },
+    "flower bloom": {
+      "count": 10,
+      "last_updated": "2026-02-09T17:11:32.441177"
+    },
+    "tree nature": {
+      "count": 10,
+      "last_updated": "2026-02-09T17:11:40.477056"
+    },
+    "cat kitten": {
+      "count": 10,
+      "last_updated": "2026-02-09T17:11:47.836291"
+    },
+    "house building": {
+      "count": 10,
+      "last_updated": "2026-02-09T17:11:55.634137"
+    },
+    "ocean sea waves": {
+      "count": 10,
+      "last_updated": "2026-02-09T17:12:05.005275"
+    },
+    "car vehicle": {
+      "count": 10,
+      "last_updated": "2026-02-09T17:12:06.013228"
+    },
+    "bird wildlife": {
+      "count": 10,
+      "last_updated": "2026-02-09T17:12:15.239763"
+    },
+    "mountain landscape": {
+      "count": 10,
+      "last_updated": "2026-02-09T17:12:15.236080"
+    }
+  },
+  "last_cleanup": null
+}

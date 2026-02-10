@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="User Dashboard">
+    <title>Dashboard - Captcha Generator</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <span class="logo-icon">👤</span>
+                <h1>Dashboard</h1>
+            </div>
+            <p class="subtitle">Welcome back!</p>
+        </header>
+
+        <!-- Dashboard Content -->
+        <main class="auth-container">
+            <div class="dashboard-card">
+                <div class="user-info">
+                    <div class="avatar">{{ user.username[0].upper() }}</div>
+                    <div class="user-details">
+                        <h2>{{ user.username }}</h2>
+                        <p>{{ user.email }}</p>
+                        <span class="member-since">Member since {{ user.created_at.strftime('%B %d, %Y') }}</span>
+                    </div>
+                </div>
+
+                <div class="dashboard-stats">
+                    <div class="stat-card">
+                        <span class="stat-icon">✅</span>
+                        <div class="stat-info">
+                            <h3>Account Status</h3>
+                            <p>Active</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-icon">🛡️</span>
+                        <div class="stat-info">
+                            <h3>Security</h3>
+                            <p>Captcha Verified</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dashboard-actions">
+                    <a href="{{ url_for('home') }}" class="action-btn primary">
+                        <span>🏠</span> Home
+                    </a>
+                    <a href="{{ url_for('captcha_demo') }}" class="action-btn primary">
+                        <span>🧩</span> Captcha Demo
+                    </a>
+                    <a href="{{ url_for('logout') }}" class="action-btn danger">
+                        <span>🚪</span> Sign Out
+                    </a>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>Logged in as <strong>{{ user.username }}</strong></p>
+        </footer>
+    </div>
+</body>
+
+</html>

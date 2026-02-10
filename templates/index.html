@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="Comprehensive Captcha Generator with multiple captcha types including text, image selection, Cloudflare-style, and puzzle captchas">
+    <title>Captcha Generator</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <span class="logo-icon">🛡️</span>
+                <h1>Captcha Generator</h1>
+            </div>
+            <p class="subtitle">Secure verification system with multiple captcha types</p>
+
+            <!-- Navigation -->
+            <div class="header-actions">
+                <a href="{{ url_for('home') }}" class="header-btn login">← Home</a>
+            </div>
+        </header>
+
+        <!-- Navigation Tabs -->
+        <nav class="nav-tabs" role="tablist">
+            <button class="tab-btn active" data-tab="text" role="tab" aria-selected="true">
+                <span class="tab-icon">📝</span>
+                <span class="tab-label">Text</span>
+            </button>
+            <button class="tab-btn" data-tab="image" role="tab" aria-selected="false">
+                <span class="tab-icon">🖼️</span>
+                <span class="tab-label">Image</span>
+            </button>
+            <button class="tab-btn" data-tab="cloudflare" role="tab" aria-selected="false">
+                <span class="tab-icon">☁️</span>
+                <span class="tab-label">Cloudflare</span>
+            </button>
+            <button class="tab-btn" data-tab="sliding" role="tab" aria-selected="false">
+                <span class="tab-icon">🧩</span>
+                <span class="tab-label">Sliding</span>
+            </button>
+            <button class="tab-btn" data-tab="drag" role="tab" aria-selected="false">
+                <span class="tab-icon">🎯</span>
+                <span class="tab-label">Drag</span>
+            </button>
+        </nav>
+
+        <!-- Captcha Panels -->
+        <main class="captcha-panels">
+            <!-- Text Captcha -->
+            <section class="panel active" id="text-panel" role="tabpanel">
+                <div class="panel-header">
+                    <h2>Text Captcha</h2>
+                    <p>Type the characters you see in the image</p>
+                </div>
+                <div class="captcha-container">
+                    <div class="captcha-image-wrapper">
+                        <img id="text-captcha-image" src="" alt="Captcha Image">
+                        <button class="refresh-btn" id="refresh-text-captcha" title="Generate new captcha">
+                            🔄
+                        </button>
+                    </div>
+                    <div class="input-group">
+                        <input type="text" id="text-captcha-input" placeholder="Enter the characters" maxlength="6"
+                            autocomplete="off">
+                        <button class="verify-btn" id="verify-text-captcha">Verify</button>
+                    </div>
+                    <div class="result-message" id="text-result"></div>
+                </div>
+            </section>
+
+            <!-- Image Captcha -->
+            <section class="panel" id="image-panel" role="tabpanel">
+                <div class="panel-header">
+                    <h2>Image Selection Captcha</h2>
+                    <p id="image-captcha-prompt">Select all matching images</p>
+                    <span class="selection-counter" id="selection-counter">Selected: 0/3</span>
+                </div>
+                <div class="captcha-container">
+                    <div class="image-grid grid-3x3" id="image-captcha-grid">
+                        <!-- Images will be inserted here -->
+                    </div>
+                    <div class="button-group">
+                        <button class="verify-btn" id="verify-image-captcha">Verify</button>
+                        <button class="refresh-btn standalone" id="refresh-image-captcha">
+                            🔄 New Captcha
+                        </button>
+                    </div>
+                    <div class="result-message" id="image-result"></div>
+                </div>
+            </section>
+
+            <!-- Cloudflare Captcha -->
+            <section class="panel" id="cloudflare-panel" role="tabpanel">
+                <div class="panel-header">
+                    <h2>Cloudflare Turnstile</h2>
+                    <p>Click the checkbox to verify you're human</p>
+                </div>
+                <div class="captcha-container">
+                    <div class="cloudflare-widget" id="cloudflare-widget">
+                        <div class="cf-checkbox-wrapper">
+                            <input type="checkbox" id="cf-checkbox">
+                            <label for="cf-checkbox">
+                                <span class="cf-checkmark"></span>
+                                <span class="cf-text">I am human</span>
+                            </label>
+                        </div>
+                        <div class="cf-branding">
+                            <span class="cf-logo">☁️</span>
+                            <span class="cf-label">Protected by Cloudflare</span>
+                        </div>
+                        <div class="cf-spinner" id="cf-spinner"></div>
+                        <div class="cf-success" id="cf-success">✓</div>
+                    </div>
+                    <button class="refresh-btn standalone" id="refresh-cloudflare-captcha">
+                        🔄 Reset
+                    </button>
+                    <div class="result-message" id="cloudflare-result"></div>
+                </div>
+            </section>
+
+            <!-- Sliding Puzzle Captcha -->
+            <section class="panel" id="sliding-panel" role="tabpanel">
+                <div class="panel-header">
+                    <h2>Sliding Puzzle</h2>
+                    <p>Drag the slider to complete the puzzle</p>
+                </div>
+                <div class="captcha-container">
+                    <div class="puzzle-container" id="sliding-puzzle-container">
+                        <img id="sliding-bg" src="" alt="Puzzle Background">
+                        <img id="sliding-piece" src="" alt="Puzzle Piece" class="sliding-piece">
+                    </div>
+                    <div class="slider-container">
+                        <input type="range" id="puzzle-slider" min="0" max="240" value="0">
+                        <div class="slider-track">
+                            <div class="slider-progress" id="slider-progress"></div>
+                        </div>
+                    </div>
+                    <div class="button-group">
+                        <button class="verify-btn" id="verify-sliding">Verify</button>
+                        <button class="refresh-btn standalone" id="refresh-sliding-captcha">🔄</button>
+                    </div>
+                    <div class="result-message" id="sliding-result"></div>
+                </div>
+            </section>
+
+            <!-- Drag Puzzle Captcha -->
+            <section class="panel" id="drag-panel" role="tabpanel">
+                <div class="panel-header">
+                    <h2>Drag Puzzle</h2>
+                    <p>Drag all pieces to their correct positions</p>
+                </div>
+                <div class="captcha-container">
+                    <div class="drag-puzzle-wrapper">
+                        <div class="puzzle-board" id="drag-puzzle-board">
+                            <img id="drag-bg" src="" alt="Puzzle Background">
+                            <div class="drop-zones" id="drop-zones"></div>
+                            <div class="draggable-pieces" id="draggable-pieces"></div>
+                        </div>
+                        <div class="pieces-tray" id="pieces-tray">
+                            <!-- Pieces will be placed here initially -->
+                        </div>
+                    </div>
+                    <div class="button-group">
+                        <button class="verify-btn" id="verify-drag">Verify</button>
+                        <button class="refresh-btn standalone" id="refresh-drag-captcha">🔄</button>
+                    </div>
+                    <div class="result-message" id="drag-result"></div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>Captcha Generator Demo • All captcha types for testing purposes</p>
+        </footer>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+
+</html>
