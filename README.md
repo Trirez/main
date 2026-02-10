@@ -39,11 +39,14 @@ Prerequisites
 Make sure you have Python 3.x installed.
 
 Install Dependencies
+```bash
 pip install -r requirements.txt
+```
 
 Run the App
+```bash
 python main.py
-
+```
 
 Once running, open a browser and navigate to the provided local address (e.g., http://127.0.0.1:5000
 ) to view the CAPTCHA form.
@@ -63,8 +66,9 @@ This is a basic example of a challenge-response test — a widely used security 
 🧪 Running Tests
 
 To ensure everything works as expected:
-
+```bash
 python test_captchas.py
+```
 
 📄 License
 
